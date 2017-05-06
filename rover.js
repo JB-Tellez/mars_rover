@@ -10,7 +10,8 @@ const rovers = [
     name: 'roverOne',
     commands: ['f', 'f', 'f', 'f', 'f', 'r', 'f', 'f'],
     commandIndex: 0,
-    status: READY
+    status: READY,
+    message: ''
   },
   {
     position: [9, 9],
@@ -18,7 +19,8 @@ const rovers = [
     name: 'roverTwo',
     commands: ['f', 'f', 'f', 'f', 'f', 'r', 'f', 'f'],
     commandIndex: 0,
-    status: READY
+    status: READY,
+    message: ''
   }
 
 ];
@@ -36,8 +38,6 @@ const headings = ['N', 'E', 'S', 'W'];
 
 const WIDTH = 10;
 const HEIGHT = 10; 
-
-console.log(HEIGHT);
 
 function goForward(rover) {
 
@@ -58,7 +58,7 @@ function goForward(rover) {
   obstacles.forEach(obstacle => {
     if (obstacle[0] === nextPosition[0] && obstacle[1] === nextPosition[1]) {
       rover.status = DONE;
-      console.log('will hit rock');
+      rover.message = 'Will hit rock';
     }
   });
 
@@ -142,7 +142,7 @@ function startMission(rovers) {
       if (rover.status !== DONE) {
         let command = rover.commands[rover.commandIndex];
 
-        hud.innerHTML = hud.innerHTML + '<br>' + rover.name + ' current position [' + rover.position + '] heading ' + rover.heading;
+        hud.innerHTML = hud.innerHTML + `<br> ${rover.name}  current position [${rover.position}] heading ${rover.heading}`;
 
         obeyCommand(command, rover);
 
@@ -150,9 +150,10 @@ function startMission(rovers) {
           rover.commandIndex = rover.commandIndex + 1;
         } else {
           rover.status = DONE;
+          rover.message = 'Mission complete';
         }
 
-        hud.innerHTML = hud.innerHTML + ' --- ' + command + ' [' + rover.position + '] ';
+        hud.innerHTML = hud.innerHTML + ` ---  ${command} next position [${rover.position}] ${rover.message}`;
 
         if (rover.status === DONE) {
           hud.innerHTML = hud.innerHTML + ' all done!!!';
