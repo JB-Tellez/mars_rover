@@ -65,8 +65,6 @@ function goForward(rover) {
 
   let otherRovers = rovers.filter( otherRover => otherRover !== rover);
 
-  console.log(otherRovers);
-
   // check for other rovers
   otherRovers.forEach(otherRover => {
     if (rover !== otherRover) {
