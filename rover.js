@@ -14,7 +14,7 @@ const rovers = [
     message: ''
   },
   {
-    position: [9, 9],
+    position: [9, 0],
     heading: 'S',
     name: 'roverTwo',
     commands: ['f', 'f', 'f', 'f', 'f', 'r', 'f', 'f'],
@@ -28,7 +28,7 @@ const rovers = [
 
 
 const obstacles = [
-  [3, 0],
+  [3, 1],
   [9, 7]
 ];
 
@@ -55,10 +55,25 @@ function goForward(rover) {
 
   nextPosition[posIndex] = (nextPosition[posIndex] + addend) % WIDTH;
 
+  // check for obstacles
   obstacles.forEach(obstacle => {
     if (obstacle[0] === nextPosition[0] && obstacle[1] === nextPosition[1]) {
       rover.status = DONE;
       rover.message = 'Will hit rock';
+    }
+  });
+
+  let otherRovers = rovers.filter( otherRover => otherRover !== rover);
+
+  console.log(otherRovers);
+
+  // check for other rovers
+  otherRovers.forEach(otherRover => {
+    if (rover !== otherRover) {
+      if (otherRover.position[0] === nextPosition[0] && otherRover.position[1] === nextPosition[1]) {
+        rover.status = DONE;
+        rover.message = 'Will hit other rover!';
+      }
     }
   });
 
