@@ -34,9 +34,10 @@ const obstacles = [
 // presumes starting at north and moving clockwise like a compass
 const headings = ['N', 'E', 'S', 'W'];
 
-const WIDTH = 10; // the number of rows in the grid. Since grid is a square WIDTH = HEIGHT
+const WIDTH = 10;
+const HEIGHT = 10; 
 
-
+console.log(HEIGHT);
 
 function goForward(rover) {
 
