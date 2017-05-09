@@ -1,4 +1,10 @@
 
+/* Mars Rover Kata
+add any number of rovers to rovers array (add addtional roverPosition and roverTrail classes as needed to styles.css)
+add obstacles to array
+Set WIDTH or HEIGHT constants to determine size of grid
+The grid has an inverted y axis so 0,0 is top left and and y position gets larger going down the screen
+*/
 const READY = 'READY';
 const WAITING = 'WAITING';
 const DONE = 'DONE';
@@ -59,6 +65,7 @@ const obstacles = [
   [18,4]
 ];
 
+// go through rovers declared above and collect CSS classes for dynamic removal
 const classesToRemove = rovers.reduce((acc, cur) => {
   acc.push(cur.colorClass, cur.trailClass);
   return acc;
@@ -69,6 +76,7 @@ const classesToRemove = rovers.reduce((acc, cur) => {
 // presumes starting at north and moving clockwise like a compass
 const headings = [NORTH, EAST, SOUTH, WEST];
 
+// start when it's safe
 window.onload = start;
 
 function start() {
@@ -76,6 +84,76 @@ function start() {
   initGrid();
 
   startMission(rovers);
+
+}
+
+function initGrid() {
+
+  let row = document.getElementById('row-0');
+
+  let cell = document.getElementById("[0,0]");
+  
+  let tableBody = document.getElementById('table-body');
+
+  // first get row 0 in shape
+  for (let columnIndex = 1; columnIndex < WIDTH; columnIndex++) {
+
+    let cellClone = cell.cloneNode();
+
+    row.appendChild(cellClone);
+
+    cellClone.id = `[${columnIndex},0]`;
+
+  }
+
+  // now clone row 0 and set ids appropriately
+  for (let rowIndex = 1; rowIndex < HEIGHT; rowIndex++) {
+
+    let newRow = row.cloneNode(true);
+
+    tableBody.appendChild(newRow);
+
+    let cells = newRow.getElementsByClassName('divTableCell');
+
+    for (let columnIndex = 0; columnIndex < cells.length; columnIndex++) {
+
+      let cellNode = cells[columnIndex];
+
+      cellNode.id = `[${columnIndex},${rowIndex}]`;
+
+    }
+
+  }
+
+  async function startMission(rovers) {
+
+    while( rovers.some( rvr => rvr.status !== DONE)) {
+
+    for (let r = 0; r < rovers.length; r++) {
+
+      let rover = rovers[r];
+
+      if (rover.status !== DONE) {
+
+        let command = rover.commands[rover.commandIndex];
+
+        await obeyCommand(command, rover);
+
+        if (rover.commandIndex < rover.commands.length - 1) {
+          rover.commandIndex = rover.commandIndex + 1;
+        } else {
+          rover.status = DONE;
+          rover.message = 'Mission complete';
+        }
+      }
+    }
+  }
+}
+
+  // add the obstacles
+  obstacles.forEach(obstacle => {
+    document.getElementById(`[${obstacle[0]},${obstacle[1]}]`).classList.add('obstacle');
+  });
 
 }
 
@@ -118,7 +196,7 @@ function goForward(rover) {
 
   }
 
-  colorCell(rover);
+  colorCurrentCell(rover);
 
 }
 
@@ -127,6 +205,7 @@ function makeCellTrail(rover) {
   document.getElementById(getCellIdForRover(rover)).classList.add(rover.trailClass);
 }
 
+// heading = the current direction rover is facing 
 function getHeading(curHeading, turn) {
 
   let headingIndex = headings.indexOf(curHeading);
@@ -157,6 +236,7 @@ function getHeading(curHeading, turn) {
   return headings[headingIndex];
 }
 
+// function is async to allow for nicer presentation where rover drives around over time
 async function obeyCommand(cmd, rover) {
 
   switch (cmd) {
@@ -186,32 +266,7 @@ async function obeyCommand(cmd, rover) {
 }
 
 
-async function startMission(rovers) {
-
-    while( rovers.some( rvr => rvr.status !== DONE)) {
-
-    for (let r = 0; r < rovers.length; r++) {
-
-      let rover = rovers[r];
-
-      if (rover.status !== DONE) {
-
-        let command = rover.commands[rover.commandIndex];
-
-        await obeyCommand(command, rover);
-
-        if (rover.commandIndex < rover.commands.length - 1) {
-          rover.commandIndex = rover.commandIndex + 1;
-        } else {
-          rover.status = DONE;
-          rover.message = 'Mission complete';
-        }
-      }
-    }
-  }
-}
-
-function colorCell(rover) {
+function colorCurrentCell(rover) {
 
   let id = getCellIdForRover(rover);
 
@@ -224,51 +279,8 @@ function colorCell(rover) {
 }
 
 function getCellIdForRover(rover) {
-
   return `[${rover.position[0]},${rover.position[1]}]`;
 }
 
-function initGrid() {
 
-  let row = document.getElementById('row-0');
-
-  let cell = document.getElementById("[0,0]");
-  
-  let tableBody = document.getElementById('table-body');
-
-  // first get row 0 in shape
-  for (let columnIndex = 1; columnIndex < WIDTH; columnIndex++) {
-
-    let cellClone = cell.cloneNode();
-
-    row.appendChild(cellClone);
-
-    cellClone.id = `[${columnIndex},0]`;
-
-  }
-
-  for (let rowIndex = 1; rowIndex < HEIGHT; rowIndex++) {
-
-    let newRow = row.cloneNode(true);
-
-    tableBody.appendChild(newRow);
-
-    let cells = newRow.getElementsByClassName('divTableCell');
-
-    for (let columnIndex = 0; columnIndex < cells.length; columnIndex++) {
-
-      let cellNode = cells[columnIndex];
-
-      cellNode.id = `[${columnIndex},${rowIndex}]`;
-
-    }
-
-  }
-
-  // add the obstacles
-  obstacles.forEach(obstacle => {
-    document.getElementById(`[${obstacle[0]},${obstacle[1]}]`).classList.add('obstacle');
-  });
-
-}
 
