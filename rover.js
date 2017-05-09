@@ -21,6 +21,8 @@ const RIGHT = 'r';
 const BACK = 'b';
 const FORWARD = 'f';
 
+COMMAND_DELAY = 25; // milliseconds to delay commands
+
 const rovers = [
   {
     position: [0, 0],
@@ -260,7 +262,7 @@ async function obeyCommand(cmd, rover) {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve(true);
-    }, 25);
+    }, COMMAND_DELAY);
   });
 
 }
