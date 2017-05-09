@@ -8,10 +8,8 @@ The grid has an inverted y axis so 0,0 is top left and and y position gets large
 const READY = 'READY';
 const WAITING = 'WAITING';
 const DONE = 'DONE';
-
 const WIDTH = 25;
 const HEIGHT = 15;
-
 const NORTH = 'NORTH';
 const EAST = 'EAST';
 const SOUTH = 'SOUTH';
@@ -20,7 +18,6 @@ const LEFT = 'l';
 const RIGHT = 'r';
 const BACK = 'b';
 const FORWARD = 'f';
-
 const COMMAND_DELAY = 25; // milliseconds to delay commands
 
 const rovers = [
@@ -64,7 +61,7 @@ const obstacles = [
   [3, 4],
   [9, 7],
   [20, 12],
-  [18,4]
+  [18, 4]
 ];
 
 // go through rovers declared above and collect CSS classes for dynamic removal
@@ -78,12 +75,25 @@ const classesToRemove = rovers.reduce((acc, cur) => {
 // presumes starting at north and moving clockwise like a compass
 const headings = [NORTH, EAST, SOUTH, WEST];
 
+
+
+// start when it's safe
+window.onload = start;
+
+function start() {
+
+  initGrid();
+
+  startMission(rovers);
+
+}
+
 function initGrid() {
 
   let row = document.getElementById('row-0');
 
   let cell = document.getElementById("[0,0]");
-  
+
   let tableBody = document.getElementById('table-body');
 
   // first get row 0 in shape
@@ -116,9 +126,15 @@ function initGrid() {
 
   }
 
-  async function startMission(rovers) {
+  // add the obstacles
+  obstacles.forEach(obstacle => {
+    document.getElementById(`[${obstacle[0]},${obstacle[1]}]`).classList.add('obstacle');
+  });
+}
 
-    while( rovers.some( rvr => rvr.status !== DONE)) {
+async function startMission(rovers) {
+
+  while (rovers.some(rvr => rvr.status !== DONE)) {
 
     for (let r = 0; r < rovers.length; r++) {
 
@@ -141,12 +157,6 @@ function initGrid() {
   }
 }
 
-  // add the obstacles
-  obstacles.forEach(obstacle => {
-    document.getElementById(`[${obstacle[0]},${obstacle[1]}]`).classList.add('obstacle');
-  });
-
-}
 
 function goForward(rover) {
 
@@ -273,16 +283,7 @@ function getCellIdForRover(rover) {
   return `[${rover.position[0]},${rover.position[1]}]`;
 }
 
-// start when it's safe
-window.onload = start;
 
-function start() {
-
-  initGrid();
-
-  startMission(rovers);
-
-}
 
 
 
