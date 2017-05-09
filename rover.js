@@ -21,7 +21,7 @@ const RIGHT = 'r';
 const BACK = 'b';
 const FORWARD = 'f';
 
-COMMAND_DELAY = 25; // milliseconds to delay commands
+const COMMAND_DELAY = 25; // milliseconds to delay commands
 
 const rovers = [
   {
