@@ -78,17 +78,6 @@ const classesToRemove = rovers.reduce((acc, cur) => {
 // presumes starting at north and moving clockwise like a compass
 const headings = [NORTH, EAST, SOUTH, WEST];
 
-// start when it's safe
-window.onload = start;
-
-function start() {
-
-  initGrid();
-
-  startMission(rovers);
-
-}
-
 function initGrid() {
 
   let row = document.getElementById('row-0');
@@ -282,6 +271,17 @@ function colorCurrentCell(rover) {
 
 function getCellIdForRover(rover) {
   return `[${rover.position[0]},${rover.position[1]}]`;
+}
+
+// start when it's safe
+window.onload = start;
+
+function start() {
+
+  initGrid();
+
+  startMission(rovers);
+
 }
 
 
