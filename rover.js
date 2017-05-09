@@ -3,57 +3,92 @@ const READY = 'READY';
 const WAITING = 'WAITING';
 const DONE = 'DONE';
 
+const WIDTH = 25;
+const HEIGHT = 15;
+
+const NORTH = 'NORTH';
+const EAST = 'EAST';
+const SOUTH = 'SOUTH';
+const WEST = 'WEST';
+const LEFT = 'l';
+const RIGHT = 'r';
+const BACK = 'b';
+const FORWARD = 'f';
+
 const rovers = [
   {
     position: [0, 0],
-    heading: 'N',
+    heading: SOUTH,
     name: 'roverOne',
-    commands: ['f', 'f', 'f', 'f', 'f', 'r', 'f', 'f'],
+    commands: ['f', 'l', 'f', 'f', 'f', 'r', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'r', 'f', 'f'],
     commandIndex: 0,
     status: READY,
-    message: ''
+    message: '',
+    colorClass: 'roverPosition1',
+    trailClass: 'roverTrail1'
   },
   {
-    position: [9, 0],
-    heading: 'S',
+    position: [6, 8],
+    heading: WEST,
     name: 'roverTwo',
-    commands: ['f', 'f', 'f', 'f', 'f', 'r', 'f', 'f'],
+    commands: ['f', 'f', 'r', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'r', 'f', 'f', 'r', 'f', 'l', 'f', 'f', 'f', 'f'],
     commandIndex: 0,
     status: READY,
-    message: ''
+    message: '',
+    colorClass: 'roverPosition2',
+    trailClass: 'roverTrail2'
+  },
+  {
+    position: [9, 8],
+    heading: WEST,
+    name: 'roverThree',
+    commands: ['f', 'f', 'r', 'f', 'f', 'f', 'f', 'f', 'l', 'f', 'f', 'f', 'b', 'f', 'f', 'r', 'f', 'f', 'r', 'f', 'l', 'f', 'f', 'f', 'f'],
+    commandIndex: 0,
+    status: READY,
+    message: '',
+    colorClass: 'roverPosition3',
+    trailClass: 'roverTrail3'
   }
 
 ];
 
-
-
 const obstacles = [
-  [3, 1],
-  [9, 7]
+  [3, 4],
+  [9, 7],
+  [20, 12],
+  [18,4]
 ];
+
+const classesToRemove = rovers.reduce((acc, cur) => {
+  acc.push(cur.colorClass, cur.trailClass);
+  return acc;
+}, []);
+
 
 // order matters
 // presumes starting at north and moving clockwise like a compass
-const headings = ['N', 'E', 'S', 'W'];
+const headings = [NORTH, EAST, SOUTH, WEST];
 
-const WIDTH = 10;
-const HEIGHT = 10; 
+window.onload = start;
+
+function start() {
+
+  initGrid();
+
+  startMission(rovers);
+
+}
 
 function goForward(rover) {
 
-  let nextPosition = [rover.position[0], rover.position[1]];
-
-  const movementInfo = {
-    'N': [0, 1],
-    'E': [1, 1],
-    'S': [0, WIDTH - 1],
-    'W': [1, WIDTH - 1]
+  const nexPositions = {
+    NORTH: [rover.position[0], (rover.position[1] + (HEIGHT - 1)) % HEIGHT],
+    EAST: [(rover.position[0] + (WIDTH - 1)) % WIDTH, rover.position[1]],
+    SOUTH: [rover.position[0], (rover.position[1] + 1) % HEIGHT],
+    WEST: [(rover.position[0] + 1) % WIDTH, rover.position[1]]
   };
 
-  let posIndex = movementInfo[rover.heading][0];
-  let addend = movementInfo[rover.heading][1];
-
-  nextPosition[posIndex] = (nextPosition[posIndex] + addend) % WIDTH;
+  let nextPosition = nexPositions[rover.heading];
 
   // check for obstacles
   obstacles.forEach(obstacle => {
@@ -63,7 +98,7 @@ function goForward(rover) {
     }
   });
 
-  let otherRovers = rovers.filter( otherRover => otherRover !== rover);
+  let otherRovers = rovers.filter(otherRover => otherRover !== rover);
 
   // check for other rovers
   otherRovers.forEach(otherRover => {
@@ -77,33 +112,42 @@ function goForward(rover) {
 
   if (rover.status !== DONE) {
 
+    makeCellTrail(rover);
+
     rover.position = nextPosition;
+
   }
 
+  colorCell(rover);
+
+}
+
+function makeCellTrail(rover) {
+
+  document.getElementById(getCellIdForRover(rover)).classList.add(rover.trailClass);
 }
 
 function getHeading(curHeading, turn) {
 
-
-
   let headingIndex = headings.indexOf(curHeading);
+
   let headingCount = headings.length;
 
   switch (turn) {
 
-    case 'r':
+    case LEFT:
 
       headingIndex = (headingIndex + 1) % headingCount;
 
       break;
 
-    case 'l':
+    case RIGHT:
 
       headingIndex = (headingIndex + headingCount - 1) % headingCount;
 
       break;
 
-    case 'b':
+    case BACK:
 
       headingIndex = (headingIndex + headingCount / 2) % headingCount;
 
@@ -113,51 +157,48 @@ function getHeading(curHeading, turn) {
   return headings[headingIndex];
 }
 
-function obeyCommand(cmd, rover) {
+async function obeyCommand(cmd, rover) {
 
   switch (cmd) {
 
-    case 'f':
+    case FORWARD:
 
       goForward(rover);
 
       break;
 
-    case 'b':
-
-      rover.heading = getHeading(rover.heading, cmd);
-
-      goForward(rover);
-
-      break;
-
-    case 'r':
-    case 'l':
+    case RIGHT:
+    case LEFT:
+    case BACK:
 
       rover.heading = getHeading(rover.heading, cmd);
 
       break;
   }
 
+  // add a little delay for nice looking display
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(true);
+    }, 25);
+  });
+
 }
 
 
-function startMission(rovers) {
+async function startMission(rovers) {
 
-  var hud = document.getElementById("hud");
-
-  while (rovers[0].status !== DONE || rovers[1].status !== DONE) {
+    while( rovers.some( rvr => rvr.status !== DONE)) {
 
     for (let r = 0; r < rovers.length; r++) {
 
       let rover = rovers[r];
 
       if (rover.status !== DONE) {
+
         let command = rover.commands[rover.commandIndex];
 
-        hud.innerHTML = hud.innerHTML + `<br> ${rover.name}  current position [${rover.position}] heading ${rover.heading}`;
-
-        obeyCommand(command, rover);
+        await obeyCommand(command, rover);
 
         if (rover.commandIndex < rover.commands.length - 1) {
           rover.commandIndex = rover.commandIndex + 1;
@@ -165,24 +206,69 @@ function startMission(rovers) {
           rover.status = DONE;
           rover.message = 'Mission complete';
         }
-
-        hud.innerHTML = hud.innerHTML + ` ---  ${command} next position [${rover.position}] ${rover.message}`;
-
-        if (rover.status === DONE) {
-          hud.innerHTML = hud.innerHTML + ' all done!!!';
-        }
-
       }
-
     }
   }
+}
 
+function colorCell(rover) {
 
+  let id = getCellIdForRover(rover);
+
+  let elem = document.getElementById(id);
+
+  elem.classList.remove(classesToRemove);
+
+  elem.classList.add(rover.colorClass);
 
 }
 
-function start() {
-  startMission(rovers);
+function getCellIdForRover(rover) {
+
+  return `[${rover.position[0]},${rover.position[1]}]`;
 }
 
-window.onload = start;
+function initGrid() {
+
+  let row = document.getElementById('row-0');
+
+  let cell = document.getElementById("[0,0]");
+  
+  let tableBody = document.getElementById('table-body');
+
+  // first get row 0 in shape
+  for (let columnIndex = 1; columnIndex < WIDTH; columnIndex++) {
+
+    let cellClone = cell.cloneNode();
+
+    row.appendChild(cellClone);
+
+    cellClone.id = `[${columnIndex},0]`;
+
+  }
+
+  for (let rowIndex = 1; rowIndex < HEIGHT; rowIndex++) {
+
+    let newRow = row.cloneNode(true);
+
+    tableBody.appendChild(newRow);
+
+    let cells = newRow.getElementsByClassName('divTableCell');
+
+    for (let columnIndex = 0; columnIndex < cells.length; columnIndex++) {
+
+      let cellNode = cells[columnIndex];
+
+      cellNode.id = `[${columnIndex},${rowIndex}]`;
+
+    }
+
+  }
+
+  // add the obstacles
+  obstacles.forEach(obstacle => {
+    document.getElementById(`[${obstacle[0]},${obstacle[1]}]`).classList.add('obstacle');
+  });
+
+}
+
